@@ -45,6 +45,7 @@ app.get("/campgrounds/new", (req, res) => {
 app.post(
   "/campgrounds",
   catchAsync(async (req, res, next) => {
+    if (!req.body.campground) throw new ExpressError('Invalid Campground', 400)
     const newCampground = req.body.campground;
     const campground = new Campground(newCampground);
 
@@ -88,9 +89,10 @@ app.all("*", (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message = "Something went wrong" } = err;
-  res.status(statusCode);
-  res.send("Oh boyy!!!");
+  const { statusCode = 500 } = err;
+  if (!err.message) err.message = "Oh NO , Something Went Wrong!"
+  res.status(statusCode).render("partials/error", { err })
+  // res.send("Oh boyy!!!");
 });
 
 app.listen(Port, () => {
