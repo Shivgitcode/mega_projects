@@ -30,6 +30,27 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(methodOverride("_method"));
 
+const validateCampground = (req, res, next) => {
+  const campgroundSchema = joi.object({
+    campground: joi.object({
+      title: joi.string().required(),
+      price: joi.number().required().min(0),
+      image: joi.string().required(),
+      description: joi.string().required()
+    }).required(),
+
+  })
+  const { error } = campgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map(el => el.message).join(',')
+    throw new ExpressError(msg, 400)
+  }
+  else {
+    next()
+  }
+
+}
+
 app.get("/", (req, res) => {
   res.render("home");
 });
@@ -44,25 +65,13 @@ app.get("/campgrounds/new", (req, res) => {
 });
 
 app.post(
-  "/campgrounds",
+  "/campgrounds", validateCampground,
   catchAsync(async (req, res, next) => {
     // if (!req.body.campground) throw new ExpressError('Invalid Campground', 400)
-    const campgroundSchema = joi.object({
-      campground: joi.object({
-        title: joi.string().required(),
-        price: joi.number().required().min(0),
-        image: Joi.string().required(),
-        description: Joi.string().required()
-      }).required(),
 
-    })
     // const result = campgroundSchema.validate(req.body)
-    const { error } = campgroundSchema.validate(req.body);
-    if (error) {
-      const msg = error.details.map(el => el.message).join(',')
-      throw new ExpressError(msg, 400)
-    }
-    console.log(result)
+
+    // console.log(result)
     const newCampground = req.body.campground;
     const campground = new Campground(newCampground);
 
@@ -85,7 +94,7 @@ app.get(
   })
 );
 
-app.put("/campgrounds/:id", async (req, res) => {
+app.put("/campgrounds/:id", validateCampground, catchAsync(async (req, res) => {
   // res.send("It Worked!!");
   const { id } = req.params;
   // const { campground } = req.body;
@@ -93,7 +102,7 @@ app.put("/campgrounds/:id", async (req, res) => {
     ...req.body.campground,
   });
   res.redirect(`/campgrounds/${campground._id}`);
-});
+}));
 
 app.delete("/campgrounds/:id", async (req, res) => {
   const { id } = req.params;
