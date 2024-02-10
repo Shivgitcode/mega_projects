@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const joi = require("joi")
 const path = require("path");
 const mongoose = require("mongoose");
 const Campground = require("./models/campground");
@@ -45,7 +46,23 @@ app.get("/campgrounds/new", (req, res) => {
 app.post(
   "/campgrounds",
   catchAsync(async (req, res, next) => {
-    if (!req.body.campground) throw new ExpressError('Invalid Campground', 400)
+    // if (!req.body.campground) throw new ExpressError('Invalid Campground', 400)
+    const campgroundSchema = joi.object({
+      campground: joi.object({
+        title: joi.string().required(),
+        price: joi.number().required().min(0),
+        image: Joi.string().required(),
+        description: Joi.string().required()
+      }).required(),
+
+    })
+    // const result = campgroundSchema.validate(req.body)
+    const { error } = campgroundSchema.validate(req.body);
+    if (error) {
+      const msg = error.details.map(el => el.message).join(',')
+      throw new ExpressError(msg, 400)
+    }
+    console.log(result)
     const newCampground = req.body.campground;
     const campground = new Campground(newCampground);
 
