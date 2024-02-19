@@ -9,7 +9,8 @@ const ejsMate = require("ejs-mate");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const Review = require('./models/review')
-const { reviewSchema } = require('./validation')
+const { reviewSchema } = require('./validation');
+const review = require("./models/review");
 mongoose
   .connect("mongodb://127.0.0.1:27017/yelp-camp")
   .then(() => {
@@ -130,6 +131,14 @@ app.put("/campgrounds/:id", validateCampground, catchAsync(async (req, res) => {
   });
   res.redirect(`/campgrounds/${campground._id}`);
 }));
+
+app.delete("/campgrounds/:id/reviews/:reveiwId", catchAsync(async (req, res, next) => {
+  const { id, reviewId } = req.params;
+  Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  Review.findByIdAndDelete(reviewId);
+  // res.send("Delete me!")
+  res.redirect(`/campground/${id}`)
+}))
 
 app.delete("/campgrounds/:id", async (req, res) => {
   const { id } = req.params;
