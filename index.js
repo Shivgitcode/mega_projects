@@ -115,7 +115,7 @@ app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res)
   // res.send('You Made It!!!')
   const campground = await Campground.findById(req.params.id);
   console.log(req.body.review)
-  const review = new Review(req.body)
+  const review = new Review(req.body.review);
   campground.reviews.push(review)
   await review.save()
   await campground.save()
@@ -132,12 +132,12 @@ app.put("/campgrounds/:id", validateCampground, catchAsync(async (req, res) => {
   res.redirect(`/campgrounds/${campground._id}`);
 }));
 
-app.delete("/campgrounds/:id/reviews/:reveiwId", catchAsync(async (req, res, next) => {
+app.delete("/campgrounds/:id/reviews/:reviewId", catchAsync(async (req, res, next) => {
   const { id, reviewId } = req.params;
-  Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-  Review.findByIdAndDelete(reviewId);
+  await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await Review.findByIdAndDelete(reviewId);
   // res.send("Delete me!")
-  res.redirect(`/campground/${id}`)
+  res.redirect(`/campgrounds/${id}`)
 }))
 
 app.delete("/campgrounds/:id", async (req, res) => {
