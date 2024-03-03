@@ -11,7 +11,7 @@ const ExpressError = require("./utils/ExpressError");
 const Review = require('./models/review')
 const { reviewSchema } = require('./validation');
 const campgrounds = require("./routes/campground")
-const review = require("./models/review");
+const reviews = require("./routes/reviews");
 mongoose
   .connect("mongodb://127.0.0.1:27017/yelp-camp")
   .then(() => {
@@ -34,7 +34,7 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(methodOverride("_method"));
 app.use("/campgrounds", campgrounds)
-app.use("/campgrounds", review)
+app.use("/campgrounds/:id/reviews", reviews)
 
 
 
