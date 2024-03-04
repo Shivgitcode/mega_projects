@@ -14,6 +14,7 @@ const validateCampground = (req, res, next) => {
         title: joi.string().required(),
         price: joi.number().required().min(0),
         image: joi.string().required(),
+        location: joi.string().required(),
         description: joi.string().required(),
       })
       .required(),
@@ -65,7 +66,10 @@ router.get(
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id).populate("reviews");
-    console.log(campground);
+    if (!campground) {
+      req.flash('error', 'cannot find that campground!')
+      return res.redirect('/campgrounds')
+    }
     res.render("campgrounds/show", { campground });
   })
 );
@@ -80,6 +84,7 @@ router.put(
     const campground = await Campground.findByIdAndUpdate(id, {
       ...req.body.campground,
     });
+    req.flash('success', 'Successfully updated campground')
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
