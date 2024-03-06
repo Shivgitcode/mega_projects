@@ -94,4 +94,7 @@ router.delete("/:id", async (req, res) => {
   res.redirect("/campgrounds");
 });
 
+
+
+
 module.exports = router;
