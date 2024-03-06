@@ -7,13 +7,14 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 
 const session = require("express-session");
-const campgrounds = require("./routes/campground");
+const campgroundRoutes = require("./routes/campground");
 const flash = require("connect-flash");
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user')
 
-const reviews = require("./routes/reviews");
+const reviewRoutes = require("./routes/reviews");
+const userRoutes = require("./routes/users")
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/yelp-camp")
@@ -71,9 +72,9 @@ app.get('/fakeUser', async (req, res) => {
   res.send(newUser)
 })
 
-
-app.use("/campgrounds", campgrounds);
-app.use("/campgrounds/:id/reviews", reviews);
+app.use("/", userRoutes)
+app.use("/campgrounds", campgroundRoutes);
+app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
