@@ -4,6 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const Campground = require("../models/campground");
 const ExpressError = require("../utils/ExpressError");
 const joi = require("joi");
+const { isLoggedIn } = require("../middleware");
 
 // const validateCampground  = require("../validation"
 
@@ -29,24 +30,22 @@ const validateCampground = (req, res, next) => {
   }
 };
 
+
 router.get("/", async (req, res) => {
   const campgrounds = await Campground.find({});
   res.render("campgrounds/index", { campgrounds });
 });
 
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
   res.render("campgrounds/new");
 });
 
 router.post(
   "/",
+  isLoggedIn,
   validateCampground,
   catchAsync(async (req, res, next) => {
-    // if (!req.body.campground) throw new ExpressError('Invalid Campground', 400)
 
-    // const result = campgroundSchema.validate(req.body)
-
-    // console.log(result)
     const newCampground = req.body.campground;
     const campground = new Campground(newCampground);
     await campground.save();
@@ -62,7 +61,7 @@ router.get("/:id/edit", async (req, res) => {
 });
 
 router.get(
-  "/:id",
+  "/:id", isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
     const campground = await Campground.findById(id).populate("reviews");
