@@ -30,7 +30,6 @@ const validateCampground = (req, res, next) => {
   }
 };
 
-
 router.get("/", async (req, res) => {
   const campgrounds = await Campground.find({});
   res.render("campgrounds/index", { campgrounds });
@@ -45,9 +44,9 @@ router.post(
   isLoggedIn,
   validateCampground,
   catchAsync(async (req, res, next) => {
-
     const newCampground = req.body.campground;
     const campground = new Campground(newCampground);
+    campground.author = req.user._id;
     await campground.save();
     req.flash("success", "Successfully made a new campground!");
 
@@ -61,13 +60,17 @@ router.get("/:id/edit", async (req, res) => {
 });
 
 router.get(
-  "/:id", isLoggedIn,
+  "/:id",
+  isLoggedIn,
   catchAsync(async (req, res) => {
     const { id } = req.params;
-    const campground = await Campground.findById(id).populate("reviews");
+    const campground = await Campground.findById(id)
+      .populate("reviews")
+      .populate("author");
+    console.log(campground);
     if (!campground) {
-      req.flash('error', 'cannot find that campground!')
-      return res.redirect('/campgrounds')
+      req.flash("error", "cannot find that campground!");
+      return res.redirect("/campgrounds");
     }
     res.render("campgrounds/show", { campground });
   })
@@ -83,7 +86,7 @@ router.put(
     const campground = await Campground.findByIdAndUpdate(id, {
       ...req.body.campground,
     });
-    req.flash('success', 'Successfully updated campground')
+    req.flash("success", "Successfully updated campground");
     res.redirect(`/campgrounds/${campground._id}`);
   })
 );
@@ -93,8 +96,5 @@ router.delete("/:id", async (req, res) => {
   await Campground.findByIdAndDelete(id);
   res.redirect("/campgrounds");
 });
-
-
-
 
 module.exports = router;
