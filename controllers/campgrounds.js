@@ -31,3 +31,37 @@ module.exports.showCampground = async (req, res) => {
   }
   res.render("campgrounds/show", { campground });
 };
+
+module.exports.renderEditForm = async (req, res) => {
+  const { id } = req.params;
+  const campground = await Campground.findById(req.params.id);
+  if (!campground) {
+    req.flash("error", "Cannot find that campground!");
+    return res.redirect("/campgrounds");
+  }
+  if (!campground.author.equals(req.user._id)) {
+    req.flash("error", "You do not have permission to do that!");
+    return res.redirect(`/campgrounds/${id}`);
+  }
+  res.render("campgrounds/edit", { campground });
+};
+
+module.exports.updateCampground = async (req, res) => {
+  const { id } = req.params;
+  const campground = await Campground.findById(id);
+  if (!campground.author.equals(req.user._id)) {
+    req.flash("error", "You do not have permission to do that!");
+    return res.redirect(`/campgrounds/${id}`);
+  }
+  const camp = await Campground.findByIdAndUpdate(id, {
+    ...req.body.campground,
+  });
+  req.flash("success", "Successfully updated campground");
+  res.redirect(`/campgrounds/${campground._id}`);
+};
+
+module.exports.deleteCampground = async (req, res) => {
+  const { id } = req.params;
+  await Campground.findByIdAndDelete(id);
+  res.redirect("/campgrounds");
+};
