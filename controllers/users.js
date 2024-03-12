@@ -1,3 +1,9 @@
+const User = require("../models/user");
+
+module.exports.renderRegister = (req, res) => {
+  res.render("users/register");
+};
+
 module.exports.register = async (req, res) => {
   try {
     const { email, username, password } = req.body;
@@ -5,11 +11,11 @@ module.exports.register = async (req, res) => {
     const registerdUser = await User.register(user, password);
     req.login(registerdUser, (err) => {
       if (err) return next(err);
+      req.flash("success", "Welcome to Yelp Camp!");
+      res.redirect("/campgrounds");
     });
-    req.flash("success", "Welcome to Yelp Camp!");
-    res.redirect("/campgrounds");
   } catch (err) {
-    req.flash("error", e.message);
+    req.flash("error", err.message);
     res.redirect("/register");
   }
 };
@@ -22,7 +28,7 @@ module.exports.sendLogin = (req, res) => {
   req.flash("success", "welcome back!");
   const redirectUrl = req.session.returnTo || "/campgrounds";
   delete req.session.returnTo;
-  res.redirect("/campgrounds");
+  res.redirect(redirectUrl);
 };
 
 module.exports.sendLogout = (req, res, next) => {
@@ -33,8 +39,4 @@ module.exports.sendLogout = (req, res, next) => {
     req.flash("success", "Goodbye!");
     res.redirect("/campgrounds");
   });
-};
-
-module.exports.renderRegister = (req, res) => {
-  res.render("users/register");
 };

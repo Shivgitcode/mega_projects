@@ -1,3 +1,6 @@
+const Review = require("../models/review");
+const Campground = require("../models/campground");
+
 module.exports.deleteReview = async (req, res, next) => {
   const { id, reviewId } = req.params;
   await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
@@ -8,14 +11,12 @@ module.exports.deleteReview = async (req, res, next) => {
 };
 
 module.exports.addingReview = async (req, res) => {
-  // res.send('You Made It!!!')
   const campground = await Campground.findById(req.params.id);
-  console.log(req.body.review);
   const review = new Review(req.body.review);
   review.author = req.user._id;
   campground.reviews.push(review);
   await review.save();
   await campground.save();
-  req.flash("success", "created new review");
+  req.flash("success", "created new review!");
   res.redirect(`/campgrounds/${campground._id}`);
 };

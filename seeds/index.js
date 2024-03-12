@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Campground = require("../models/campground");
 const cities = require("./cities");
-const campground = require("../models/campground");
 const { places, descriptors } = require("./seedHelpers");
 
 mongoose
@@ -38,4 +37,6 @@ const seedDB = async () => {
   }
 };
 
-seedDB();
+seedDB().then(() => {
+  mongoose.connection.close();
+});

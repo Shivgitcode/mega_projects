@@ -4,7 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const Campground = require("../models/campground");
 const ExpressError = require("../utils/ExpressError");
 const joi = require("joi");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, isAuthor } = require("../middleware");
 const {
   renderNewForm,
   createCampground,
@@ -45,17 +45,18 @@ router.get("/new", isLoggedIn, renderNewForm);
 
 router.post("/", isLoggedIn, validateCampground, catchAsync(createCampground));
 
-router.get("/:id/edit", renderEditForm);
+router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(renderEditForm));
 
 router.get("/:id", isLoggedIn, catchAsync(showCampground));
 
 router.put(
   "/:id",
   isLoggedIn,
+  isAuthor,
   validateCampground,
   catchAsync(updateCampground)
 );
 
-router.delete("/:id", isLoggedIn, catchAsync(deleteCampground));
+router.delete("/:id", isLoggedIn, isAuthor, catchAsync(deleteCampground));
 
 module.exports = router;

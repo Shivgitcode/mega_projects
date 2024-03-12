@@ -7,7 +7,6 @@ const ExpressError = require("../utils/ExpressError");
 const { reviewSchema } = require("../validation");
 const { isLoggedIn, isReviewAuthor } = require("../middleware");
 const { deleteReview, addingReview } = require("../controllers/reviews");
-// const { validateCampground, validateReview } = require("../validation")
 const validateReview = (req, res, next) => {
   const { error } = reviewSchema.validate(req.body);
   if (error) {
@@ -18,14 +17,13 @@ const validateReview = (req, res, next) => {
   }
 };
 
-router.delete("/:reviewId", isLoggedIn, catchAsync(deleteReview));
+router.post("/", isLoggedIn, validateReview, catchAsync(addingReview));
 
-router.post(
-  "/",
+router.delete(
+  "/:reviewId",
   isLoggedIn,
   isReviewAuthor,
-  validateReview,
-  catchAsync(addingReview)
+  catchAsync(deleteReview)
 );
 
 module.exports = router;
