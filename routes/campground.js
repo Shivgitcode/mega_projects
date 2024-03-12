@@ -15,7 +15,9 @@ const {
   deleteCampground,
 } = require("../controllers/campgrounds");
 
-// const validateCampground  = require("../validation"
+const multer = require("multer");
+const { storage } = require("../cloudinary");
+const upload = multer({ storage });
 
 const validateCampground = (req, res, next) => {
   const campgroundSchema = joi.object({
@@ -23,7 +25,7 @@ const validateCampground = (req, res, next) => {
       .object({
         title: joi.string().required(),
         price: joi.number().required().min(0),
-        image: joi.string().required(),
+        // image: joi.string().required(),
         location: joi.string().required(),
         description: joi.string().required(),
       })
@@ -43,7 +45,13 @@ router.get("/", catchAsync(index));
 
 router.get("/new", isLoggedIn, renderNewForm);
 
-router.post("/", isLoggedIn, validateCampground, catchAsync(createCampground));
+router.post(
+  "/",
+  isLoggedIn,
+  upload.array("image"),
+  validateCampground,
+  catchAsync(createCampground)
+);
 
 router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(renderEditForm));
 
@@ -53,6 +61,7 @@ router.put(
   "/:id",
   isLoggedIn,
   isAuthor,
+  upload.array("image"),
   validateCampground,
   catchAsync(updateCampground)
 );
