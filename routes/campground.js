@@ -30,6 +30,7 @@ const validateCampground = (req, res, next) => {
         description: joi.string().required(),
       })
       .required(),
+    deleteImages: joi.array(),
   });
 
   const { error } = campgroundSchema.validate(req.body);
