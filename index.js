@@ -9,12 +9,13 @@ const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
 const campgroundRoutes = require("./routes/campground");
 const flash = require("connect-flash");
-const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const User = require('./models/user')
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user");
 
 const reviewRoutes = require("./routes/reviews");
-const userRoutes = require("./routes/users")
+const userRoutes = require("./routes/users");
+const mongoSanitize = require("express-mongo-sanitize");
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/yelp-camp")
@@ -28,6 +29,7 @@ mongoose
 
 const Port = 3000;
 const sessionConfig = {
+  name: "session",
   secret: "thisshouldeabettersecret",
   resave: false,
   saveUinitialized: true,
@@ -46,6 +48,8 @@ app.set("view engine", "ejs");
 
 app.set("views", path.join(__dirname, "views"));
 
+app.use(mongoSanitize());
+
 app.use(methodOverride("_method"));
 
 app.use(session(sessionConfig));
@@ -53,27 +57,30 @@ app.use(session(sessionConfig));
 app.use(flash());
 
 app.use(passport.initialize());
-app.use(passport.session())
+app.use(passport.session());
 
-passport.use(new LocalStrategy(User.authenticate()))
+passport.use(new LocalStrategy(User.authenticate()));
 
-passport.serializeUser(User.serializeUser())
+passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
-  res.locals.error = req.flash('error ')
+  res.locals.error = req.flash("error ");
   next();
 });
 
-app.get('/fakeUser', async (req, res) => {
-  const user = new User({ email: 'shivneeraj2004@gmail.com', username: "shivansh" })
-  const newUser = await User.register(user, 'chicken')
-  res.send(newUser)
-})
+app.get("/fakeUser", async (req, res) => {
+  const user = new User({
+    email: "shivneeraj2004@gmail.com",
+    username: "shivansh",
+  });
+  const newUser = await User.register(user, "chicken");
+  res.send(newUser);
+});
 
-app.use("/", userRoutes)
+app.use("/", userRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/reviews", reviewRoutes);
 app.use(express.static(path.join(__dirname, "public")));
